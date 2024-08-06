@@ -7,8 +7,4 @@ const poolData = {
 
 const Userpool = new CognitoUserPool(poolData);
 
-export default {
-    signUp(email, password, attributes, callback) {
-        Userpool.signUp(email, password, attributes, null, callback);
-    }
-};
+export default Userpool;

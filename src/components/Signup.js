@@ -1,5 +1,6 @@
 import Userpool from "../Userpool";
 import { useState } from "react";
+import { CognitoUserAttribute } from "amazon-cognito-identity-js";
 
 const Signup = () => {
     const [name, setName] = useState('');
@@ -19,18 +20,18 @@ const Signup = () => {
         }
 
         // Prepare attributes
-        const attributes = [
-            { Name: 'name', Value: name },       // Added name attribute
-            { Name: 'birthdate', Value: birthdate },
-            { Name: 'gender', Value: gender }
+        const attributeList = [
+            new CognitoUserAttribute({ Name: 'name', Value: name }),
+            new CognitoUserAttribute({ Name: 'birthdate', Value: birthdate }),
+            new CognitoUserAttribute({ Name: 'gender', Value: gender })
         ];
 
         // Sign up
-        Userpool.signUp(email, password, attributes, (err, data) => {
+        Userpool.signUp(email, password, attributeList, null, (err, result) => {
             if (err) {
                 console.log(err);
             } else {
-                console.log(data);
+                console.log(result);
             }
         });
     };
