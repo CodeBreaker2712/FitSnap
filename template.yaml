@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  template for creating the Cognito User Pool
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+
+  CognitoUserPoolName:
+    Type: String
+    Default: harsh-userpool
+  CognitoWebClientName:
+    Type: String
+    Default: majestic-webclient
+
+Resources:
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "${Env}-${CognitoUserPoolName}"
+      AliasAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireUppercase: true
+          RequireSymbols: true
+      Schema:
+        - AttributeDataType: String
+          Mutable: true
+          Name: given_name
+          Required: true
+          StringAttributeConstraints:
+            MinLength: "1"
+        - AttributeDataType: String
+          Mutable: true
+          Name: family_name
+          Required: true
+          StringAttributeConstraints:
+            MinLength: "1"
+        - AttributeDataType: String
+          Mutable: true
+          Name: email
+          Required: true
+          StringAttributeConstraints:
+            MinLength: "1"
+
+  WebCognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "${Env}-${CognitoWebClientName}"
+      UserPoolId: !Ref CognitoUserPool
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
