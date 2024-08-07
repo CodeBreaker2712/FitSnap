@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import ConfirmationModal from './ConfirmationModal';
+import '../styles/ImageUploader.css';
 
 function ImageUploader({ jwtToken }) {
     const [imageFile, setImageFile] = useState(null);
     const [imageUrl, setImageUrl] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     const handleImageSelect = (event) => {
         const file = event.target.files[0];
@@ -24,10 +26,10 @@ function ImageUploader({ jwtToken }) {
             return;
         }
 
+        setIsUploading(true);
         const reader = new FileReader();
         reader.onloadend = async () => {
-            const base64Url = reader.result.split(',')[1]; // Remove the data:image/jpeg;base64, part
-            console.log('Base64 data:', base64Url.substring(0, 50) + '...'); // Log first 50 characters
+            const base64Url = reader.result.split(',')[1];
             try {
                 const response = await fetch('https://f9ngw4hasj.execute-api.us-east-1.amazonaws.com/dev/image', {
                     method: 'POST',
@@ -50,18 +52,19 @@ function ImageUploader({ jwtToken }) {
                 }
             } catch (error) {
                 console.error('Error uploading image:', error);
+            } finally {
+                setIsUploading(false);
             }
         };
         reader.readAsDataURL(imageFile);
     };
 
     return (
-        <div>
-            <input type="file" accept="image/*" onChange={handleImageSelect} />
-            {imageUrl && <img src={imageUrl} alt="Selected" style={{ maxWidth: '300px', marginTop: '1rem' }} />}
-            <br />
-            <button onClick={handleImageSubmit} disabled={!imageFile} style={{ marginTop: '1rem' }}>
-                Submit Image
+        <div className="image-uploader">
+            <input type="file" accept="image/*" onChange={handleImageSelect} className="file-input" />
+            {imageUrl && <img src={imageUrl} alt="Selected" className="preview-image" />}
+            <button onClick={handleImageSubmit} disabled={!imageFile || isUploading} className="submit-button">
+                {isUploading ? 'Uploading...' : 'Submit Image'}
             </button>
             <ConfirmationModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>

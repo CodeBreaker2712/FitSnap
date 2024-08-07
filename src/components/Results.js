@@ -1,5 +1,5 @@
-// Results.js
 import React, { useState, useEffect } from 'react';
+import '../styles/Results.css';
 
 function Results() {
   const [results, setResults] = useState(null);
@@ -49,26 +49,32 @@ function Results() {
     fetchResults();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!results) return <div>No results found.</div>;
+  if (loading) return <div className="loading">Loading...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
+  if (!results) return <div className="no-results">No results found.</div>;
 
   return (
-    <div>
-      <h1>Results</h1>
-      <h2>Labels:</h2>
-      <ul>
-        {results.Labels.map((label, index) => (
-          <li key={index}>{label}</li>
-        ))}
-      </ul>
-      <h2>Dietary Plan:</h2>
-      <ul>
-        {results.DietaryPlan.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-      <h2>Confidence: {results.Confidence}%</h2>
+    <div className="results-container">
+      <h1 className="results-title">Analysis Results</h1>
+      <div className="results-section">
+        <h2>Labels:</h2>
+        <ul className="results-list">
+          {results.Labels.map((label, index) => (
+            <li key={index} className="result-item">{label}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="results-section">
+        <h2>Dietary Plan:</h2>
+        <ul className="results-list">
+          {results.DietaryPlan.map((item, index) => (
+            <li key={index} className="result-item">{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="confidence-section">
+        <h2>Confidence: <span className="confidence-value">{results.Confidence}%</span></h2>
+      </div>
     </div>
   );
 }

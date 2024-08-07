@@ -37,17 +37,19 @@ function App() {
     <Router>
       <AuthWrapper>
         {({ user }) => (
-          <div>
+          <div className="app-container">
             <Navbar user={user} />
-            <Routes>
-              <Route path="/" element={
-                <div style={{ padding: '1rem' }}>
-                  <h1>Welcome to the Home Page</h1>
-                  <ImageUploader jwtToken={jwtToken} />
-                </div>
-              } />
-              <Route path="/results" element={<Results />} />
-            </Routes>
+            <div className="content-container">
+              <Routes>
+                <Route path="/" element={
+                  <div>
+                    <h1 className="page-title">Welcome to FitSnap</h1>
+                    <ImageUploader jwtToken={jwtToken} />
+                  </div>
+                } />
+                <Route path="/results" element={<Results />} />
+              </Routes>
+            </div>
           </div>
         )}
       </AuthWrapper>
