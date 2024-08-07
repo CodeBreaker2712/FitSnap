@@ -5,7 +5,8 @@ import '@aws-amplify/ui-react/styles.css';
 import Navbar from './components/Navbar';
 import AuthWrapper from './components/AuthWrapper';
 import ImageUploader from './components/ImageUploader';
-import { BrowserRouter as Router } from 'react-router-dom';
+import Results from './components/Results';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 Amplify.configure({
   Auth: {
@@ -38,10 +39,15 @@ function App() {
         {({ user }) => (
           <div>
             <Navbar user={user} />
-            <div style={{ padding: '1rem' }}>
-              <h1>Welcome to the Home Page</h1>
-              <ImageUploader jwtToken={jwtToken} />
-            </div>
+            <Routes>
+              <Route path="/" element={
+                <div style={{ padding: '1rem' }}>
+                  <h1>Welcome to the Home Page</h1>
+                  <ImageUploader jwtToken={jwtToken} />
+                </div>
+              } />
+              <Route path="/results" element={<Results />} />
+            </Routes>
           </div>
         )}
       </AuthWrapper>
