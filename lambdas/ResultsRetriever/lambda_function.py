@@ -1,6 +1,8 @@
 import json
 import boto3
 from boto3.dynamodb.conditions import Key
+import time
+import traceback
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('fitsnap-table')
@@ -8,14 +10,12 @@ table = dynamodb.Table('fitsnap-table')
 def lambda_handler(event, context):
     print('Event:', json.dumps(event))
     
-    # CORS headers
     headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
         'Access-Control-Allow-Methods': 'OPTIONS,GET'
     }
     
-    # Handle OPTIONS request
     if event['httpMethod'] == 'OPTIONS':
         return {
             'statusCode': 200,
@@ -23,7 +23,6 @@ def lambda_handler(event, context):
             'body': ''
         }
     
-    # Get the S3 object key from the query string parameters
     s3_object_key = event['queryStringParameters'].get('key')
     
     if not s3_object_key:
@@ -34,38 +33,50 @@ def lambda_handler(event, context):
         }
     
     try:
-        # Query DynamoDB
-        response = table.query(
-            KeyConditionExpression=Key('UserId').eq(s3_object_key)
-        )
+        print(f"Querying DynamoDB for key: {s3_object_key}")
+        max_retries = 3
+        for attempt in range(max_retries):
+            response = table.query(
+                KeyConditionExpression=Key('UserId').eq(s3_object_key)
+            )
+            
+            print(f"DynamoDB response: {json.dumps(response, default=str)}")
+            
+            items = response.get('Items', [])
+            
+            if items:
+                latest_result = items[-1]
+                # Convert sets to lists for JSON serialization
+                labels = list(latest_result.get('Labels', set()))
+                dietary_plan = list(latest_result.get('DietaryPlan', set()))
+                confidence = float(latest_result.get('Confidence', 0))
+                
+                return {
+                    'statusCode': 200,
+                    'headers': headers,
+                    'body': json.dumps({
+                        'Labels': labels,
+                        'DietaryPlan': dietary_plan,
+                        'Confidence': confidence
+                    })
+                }
+            
+            if attempt < max_retries - 1:
+                print(f"No items found. Retry attempt {attempt + 1}")
+                time.sleep(1)
         
-        items = response.get('Items', [])
-        
-        if not items:
-            return {
-                'statusCode': 404,
-                'headers': headers,
-                'body': json.dumps({'error': 'No results found for the given key'})
-            }
-        
-        # Return the most recent result (assuming items are sorted by timestamp)
-        latest_result = items[-1]
-        
+        print("No results found after all retries")
         return {
-            'statusCode': 200,
+            'statusCode': 404,
             'headers': headers,
-            'body': json.dumps({
-                'Labels': latest_result.get('Labels', []),
-                'DietaryPlan': latest_result.get('DietaryPlan', []),
-                'Confidence': float(latest_result.get('Confidence', 0))
-            })
+            'body': json.dumps({'error': 'No results found for the given key'})
         }
     
     except Exception as e:
         print('Error:', str(e))
+        print('Traceback:', traceback.format_exc())
         return {
             'statusCode': 500,
             'headers': headers,
-            'body': json.dumps({'error': 'Internal server error'})
+            'body': json.dumps({'error': 'Internal server error', 'details': str(e)})
         }
-        
