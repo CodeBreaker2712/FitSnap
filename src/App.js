@@ -11,8 +11,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 Amplify.configure({
   Auth: {
     region: "us-east-1",
-    userPoolId: "us-east-1_l5AOax0Ak",
-    userPoolWebClientId: "l02pfaqp87bh2kdr14h77d5tb"
+    userPoolId: "us-east-1_jQqmfFhGF",
+    userPoolWebClientId: "7q905bojpeani6qj860dgga8b5"
   }
 });
 

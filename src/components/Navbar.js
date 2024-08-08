@@ -17,12 +17,14 @@ function Navbar({ user }) {
 
   return (
     <nav className="navbar">
-      <div className="navbar-left">
-        <Link to="/" className="navbar-link">Home</Link>
-      </div>
-      <div className="navbar-right">
-        <span className="welcome-message">{user.attributes.given_name}</span>
-        <button onClick={handleSignOut} className="sign-out-button">Sign Out</button>
+      <div className="navbar-content">
+        <div className="navbar-left">
+          <Link to="/" className="navbar-link">Home</Link>
+        </div>
+        <div className="navbar-right">
+          <span className="welcome-message">Welcome, {user.attributes.given_name}</span>
+          <button onClick={handleSignOut} className="sign-out-button">Sign Out</button>
+        </div>
       </div>
     </nav>
   );
